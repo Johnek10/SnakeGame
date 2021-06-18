@@ -1,4 +1,5 @@
 package Snake.grafika;
+
 import Snake.jednostki.*;
 
 import javax.swing.*;
@@ -9,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Screen extends JPanel implements Runnable {
-
     private static final int WIDTH = 600, HEIGHT = 600;
     private Thread thread;
     private boolean running = false;
@@ -22,6 +22,7 @@ public class Screen extends JPanel implements Runnable {
     private int xCoor = 10, yCoor = 10;
     private int size = 5;
     private int ticks = 0;
+    private int points=0;
     private Key key;
 
     private Random randomNumber;
@@ -47,34 +48,36 @@ public class Screen extends JPanel implements Runnable {
         }
 
         /*losowanie pierwszego jablka*/
-        if (apples.size() == 0){
+        if (apples.size() == 0) {
             /*losownanie wspolrzednych dla pierwszego jablka*/
             int xCoor = randomNumber.nextInt(30);
             int yCoor = randomNumber.nextInt(30);
-            apple = new Apple(xCoor,yCoor,20); //utworzenie nowego jablka
+            apple = new Apple(xCoor, yCoor, 20); //utworzenie nowego jablka
             apples.add(apple); //dodanie do kolekcji
         }
 
         /*usuwanie zjedzonego jablka*/
-        for(int i = 0; i < apples.size(); i++){
-            if(xCoor == apples.get(i).getxCoor() && yCoor == apples.get(i).getyCoor()){
+        for (int i = 0; i < apples.size(); i++) {
+            if (xCoor == apples.get(i).getxCoor() && yCoor == apples.get(i).getyCoor()) {
                 size++; //zwiekszanie weza
                 apples.remove(i);
-                System.out.println("Punkty: "+(size-5));
+                points++;
+                System.out.println("Punkty: " + points);
                 i--;
             }
         }
-        for(int i = 0; i < snake.size();i++){
-            if(xCoor == snake.get(i).getxCoordinate() && yCoor == snake.get(i).getyCoor()){
-                if(i != snake.size()-1){
-                    stop(); //kolizja
+        for (int i = 0; i < snake.size(); i++) {
+            if (xCoor == snake.get(i).getxCoordinate() && yCoor == snake.get(i).getyCoor()) {
+                if (i != snake.size() - 1) {
+
+                    stop(); //kolizja weza
                 }
             }
         }
         ticks++;
 
-        /*zapamietywanie ostatnigo kierunku */
-        if (ticks > 2000000) {
+        /*zapamietywanie ostatniego kierunku */
+        if (ticks > 200000) {
             if (right) xCoor++;
             if (left) xCoor--;
             if (up) yCoor--;
@@ -85,11 +88,15 @@ public class Screen extends JPanel implements Runnable {
             snake.add(b);
 
             if (snake.size() > size) {
-                snake.remove(0);//usuwanie z tylu weza
+                if(xCoor >= WIDTH/20 || yCoor >= HEIGHT/20 || xCoor < 0 || yCoor < 0)
+                stop();
+                else
+                snake.remove(0); //usuwanie ogona weza z planszy
             }
         }
     }
 
+    @Override
     public void paint(Graphics g) {
         g.clearRect(0, 0, WIDTH, HEIGHT);
         g.setColor(Color.BLACK);
@@ -102,11 +109,10 @@ public class Screen extends JPanel implements Runnable {
         for (int i = 0; i < HEIGHT / 20; i++) {
             g.drawLine(0, i * 20, WIDTH, i * 20);
         }
-
         for (int i = 0; i < snake.size(); i++) {
             snake.get(i).draw(g);
         }
-        for(int i = 0; i < apples.size(); i++){
+        for (int i = 0; i < apples.size(); i++) {
             apples.get(i).draw(g);
         }
     }
@@ -119,9 +125,9 @@ public class Screen extends JPanel implements Runnable {
 
     public void stop() {
         running = false;
-        try{
+        try {
             thread.join();
-        } catch(InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -134,35 +140,37 @@ public class Screen extends JPanel implements Runnable {
         }
     }
 
-    private class Key implements KeyListener{
+    private class Key implements KeyListener {
         @Override
         public void keyTyped(KeyEvent keyEvent) {
         }
+
         @Override
         public void keyPressed(KeyEvent e) {
             int key = e.getKeyCode();
             /*right arrow, left arrow, up, down*/
-            if(key == KeyEvent.VK_RIGHT && !left){
+            if (key == KeyEvent.VK_RIGHT && !left) {
                 up = false;
                 down = false;
                 right = true;
             }
-            if(key == KeyEvent.VK_LEFT && !right){
+            if (key == KeyEvent.VK_LEFT && !right) {
                 up = false;
                 down = false;
                 left = true;
             }
-            if(key == KeyEvent.VK_UP && !down){
+            if (key == KeyEvent.VK_UP && !down) {
                 left = false;
                 right = false;
                 up = true;
             }
-            if(key == KeyEvent.VK_DOWN && !up){
+            if (key == KeyEvent.VK_DOWN && !up) {
                 left = false;
                 right = false;
                 down = true;
             }
         }
+
         @Override
         public void keyReleased(KeyEvent keyEvent) {
         }
